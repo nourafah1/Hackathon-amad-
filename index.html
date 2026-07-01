@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بنك الإنماء - بنكك بصوتك</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons (FontAwesome) via Cloudflare -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div class="screen-container">
+            
+            <!-- Toast Message -->
+            <div id="toast-message" class="voice-output hidden">
+                <i id="toast-icon" class="fa-solid fa-check-circle" style="margin-left: 8px; color: var(--success)"></i>
+                <span id="toast-text"></span>
+            </div>
+
+            <!-- Voice Output Text -->
+            <div id="voice-output" class="voice-output hidden">
+                <i class="fa-solid fa-microphone-lines" style="margin-left: 8px;"></i>
+                <span id="voice-text"></span>
+            </div>
+
+            <!-- Login Screen -->
+            <div id="login-screen" class="login-screen animate-fade-in">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 25px;">
+                    <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                        <div style="font-size: 2.2rem; font-weight: 900; color: #002f4b; line-height: 1; margin-bottom: 4px;">الإنماء</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: #002f4b; line-height: 1; letter-spacing: 1px;">alinma</div>
+                    </div>
+                    <div style="background-color: #002f4b; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                        <div style="background-color: white; width: 14px; height: 32px; transform: perspective(40px) rotateY(-10deg) skewY(-10deg);"></div>
+                    </div>
+                </div>
+                <h1 class="login-title">بنكك بصوتك</h1>
+                <p class="login-subtitle">اسأل، حوّل، وتابع حسابك بالصوت</p>
+
+                <div class="login-options">
+                    <button class="login-icon-btn" onclick="handleLogin()">
+                        <i class="fa-solid fa-face-viewfinder"></i>
+                        الدخول ببصمة الوجه
+                    </button>
+                    <div id="password-login-section" style="width: 100%;">
+                        <button id="password-btn" class="login-icon-btn" onclick="showPasswordInput()" style="width: 100%;">
+                            كلمة المرور
+                        </button>
+                        <div id="password-input-container" class="hidden" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                            <input type="password" id="password-input" placeholder="أدخل كلمة المرور" style="width: 100%; padding: 15px; border-radius: 10px; border: 2px solid var(--alinma-blue); font-size: 1.2rem; text-align: center; outline: none;">
+                            <button class="btn btn-primary" onclick="handlePasswordLogin()">دخول</button>
+                            <div id="password-error" class="hidden text-danger" style="font-weight: bold; font-size: 0.9rem;">كلمة المرور غير صحيحة</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Screen -->
+            <div id="dashboard-screen" class="animate-fade-in hidden" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; border-radius: inherit; background: var(--light-bg); z-index: 10;">
+                <!-- Header -->
+                <header class="header">
+                    <div class="header-logo" style="display: flex; align-items: center; gap: 8px;">
+                        <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                            <div style="font-size: 1.2rem; font-weight: 900; color: var(--alinma-dark-blue); line-height: 1; margin-bottom: 2px;">الإنماء</div>
+                            <div style="font-size: 0.7rem; font-weight: 700; color: var(--alinma-dark-blue); line-height: 1; letter-spacing: 0.5px;">alinma</div>
+                        </div>
+                        <div style="background-color: var(--alinma-dark-blue); width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            <div style="background-color: white; width: 8px; height: 18px; transform: perspective(30px) rotateY(-10deg) skewY(-10deg);"></div>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <i class="fa-solid fa-shield-halved header-icon"></i>
+                        <i class="fa-solid fa-bell header-icon"></i>
+                        <i class="fa-solid fa-arrow-right-from-bracket header-icon" onclick="handleLogout()" style="color: var(--danger)"></i>
+                    </div>
+                </header>
+
+                <div id="dashboard-scroll-area" style="flex: 1; overflow-y: auto; padding-bottom: 20px;">
+                    <!-- Dynamic Content Area -->
+                    <div id="home-content" class="animate-fade-in">
+                        <!-- Balance Card -->
+                        <div class="balance-card">
+                            <div class="card-top">
+                                <i class="fa-solid fa-microchip"></i>
+                                <i class="fa-solid fa-wifi" style="transform: rotate(90deg);"></i>
+                            </div>
+                            <div class="card-middle">
+                                <div>
+                                    <div class="balance-label">الرصيد الحالي</div>
+                                    <div class="balance-amount"><span id="balance-value">12,450.00</span> <span style="font-size: 1rem; font-weight: normal;">ر.س</span></div>
+                                </div>
+                            </div>
+                            <div class="card-bottom">
+                                <div class="card-details">
+                                    <div class="card-detail-item">
+                                        <span class="card-detail-label">تاريخ الانتهاء</span>
+                                        <span class="card-detail-value">05/28</span>
+                                    </div>
+                                    <div class="card-detail-item">
+                                        <span class="card-detail-label">رقم البطاقة</span>
+                                        <span class="card-detail-value">**** 4595</span>
+                                    </div>
+                                </div>
+                                <div class="mc-logo">
+                                    <div class="mc-circle mc-red"></div>
+                                    <div class="mc-circle mc-yellow"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Trusted Guardian Feature Banner -->
+                        <div class="guardian-banner">
+                            <i class="fa-solid fa-user-shield guardian-icon"></i>
+                            <div class="guardian-text">
+                                <div class="guardian-title">الوصي الموثوق مفعّل</div>
+                                <div class="guardian-desc">يتم إرسال تنبيهات الأمان لابنك "أحمد".</div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Transactions -->
+                        <div class="transactions-section">
+                            <h3 class="section-title">آخر العمليات</h3>
+                            <div class="transaction-list">
+                                <div class="transaction-item">
+                                    <div class="tx-info">
+                                        <div class="tx-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                                        <div class="tx-details">
+                                            <h4>سوبرماركت بنده</h4>
+                                            <p>اليوم، 10:30 ص</p>
+                                        </div>
+                                    </div>
+                                    <div class="tx-amount negative">- 145.50</div>
+                                </div>
+                                <div class="transaction-item">
+                                    <div class="tx-info">
+                                        <div class="tx-icon"><i class="fa-solid fa-bolt"></i></div>
+                                        <div class="tx-details">
+                                            <h4>شركة الكهرباء</h4>
+                                            <p>أمس، 08:15 م</p>
+                                        </div>
+                                    </div>
+                                    <div class="tx-amount negative">- 320.00</div>
+                                </div>
+                                <div class="transaction-item">
+                                    <div class="tx-info">
+                                        <div class="tx-icon" style="color: var(--success); background: rgba(46, 204, 113, 0.1);">
+                                            <i class="fa-solid fa-arrow-down"></i>
+                                        </div>
+                                        <div class="tx-details">
+                                            <h4>حوالة واردة - محمد</h4>
+                                            <p>18 يونيو، 02:00 م</p>
+                                        </div>
+                                    </div>
+                                    <div class="tx-amount positive">+ 500.00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- Close home-content -->
+
+                    <!-- Beneficiaries Content -->
+                    <div id="beneficiaries-content" class="animate-fade-in hidden" style="padding: 10px 25px;">
+                        <h3 class="section-title" style="margin-bottom: 20px;">قائمة المستفيدين</h3>
+                        <div class="transaction-list">
+                            <div class="transaction-item" style="cursor: pointer;" onclick="showBeneficiaryDetails('محمد الخالد', 'بنك الإنماء - SA12 0000 0000 0000')">
+                                <div class="tx-info">
+                                    <div class="tx-icon" style="background: rgba(0, 77, 113, 0.1);"><i class="fa-solid fa-user"></i></div>
+                                    <div class="tx-details">
+                                        <h4>محمد الخالد</h4>
+                                        <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 3px;">بنك الإنماء - SA12 0000 0000 0000</p>
+                                    </div>
+                                </div>
+                                <div class="tx-amount"><i class="fa-solid fa-chevron-left text-primary"></i></div>
+                            </div>
+                            <div class="transaction-item" style="cursor: pointer;" onclick="showBeneficiaryDetails('سارة أحمد', 'بنك الراجحي - SA34 0000 0000 0000')">
+                                <div class="tx-info">
+                                    <div class="tx-icon" style="background: rgba(0, 77, 113, 0.1);"><i class="fa-solid fa-user"></i></div>
+                                    <div class="tx-details">
+                                        <h4>سارة أحمد</h4>
+                                        <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 3px;">بنك الراجحي - SA34 0000 0000 0000</p>
+                                    </div>
+                                </div>
+                                <div class="tx-amount"><i class="fa-solid fa-chevron-left text-primary"></i></div>
+                            </div>
+                            <div class="transaction-item" style="cursor: pointer;" onclick="showBeneficiaryDetails('شركة الكهرباء', 'سداد فواتير - رقم الحساب 9384729')">
+                                <div class="tx-info">
+                                    <div class="tx-icon" style="background: rgba(0, 77, 113, 0.1);"><i class="fa-solid fa-bolt"></i></div>
+                                    <div class="tx-details">
+                                        <h4>شركة الكهرباء</h4>
+                                        <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 3px;">سداد فواتير - رقم الحساب 9384729</p>
+                                    </div>
+                                </div>
+                                <div class="tx-amount"><i class="fa-solid fa-chevron-left text-primary"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Beneficiary Details Content -->
+                    <div id="beneficiary-details-content" class="animate-fade-in hidden" style="padding: 10px 25px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 20px; gap: 15px;">
+                            <i class="fa-solid fa-arrow-right" style="cursor: pointer; font-size: 1.2rem; color: var(--alinma-dark-blue);" onclick="backToBeneficiaries()"></i>
+                            <h3 class="section-title" style="margin-bottom: 0;">سجل العمليات</h3>
+                        </div>
+                        
+                        <div style="background: var(--white); padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; text-align: center;">
+                            <div style="width: 60px; height: 60px; background: rgba(0, 77, 113, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 1.5rem; color: var(--alinma-blue);">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <h2 id="detail-name" style="color: var(--alinma-dark-blue); margin-bottom: 5px;">اسم المستفيد</h2>
+                            <p id="detail-bank" style="color: var(--text-muted); font-size: 0.9rem;">بنك</p>
+                        </div>
+
+                        <h3 class="section-title" style="margin-bottom: 15px; font-size: 1.1rem;">آخر 5 حوالات سابقة</h3>
+                        <div class="transaction-list">
+                            <div class="transaction-item">
+                                <div class="tx-info">
+                                    <div class="tx-icon" style="color: var(--text-main); background: rgba(231, 76, 60, 0.1);"><i class="fa-solid fa-arrow-up"></i></div>
+                                    <div class="tx-details">
+                                        <h4>حوالة صادرة</h4>
+                                        <p>15 يونيو، 04:20 م</p>
+                                    </div>
+                                </div>
+                                <div class="tx-amount negative">- 500.00</div>
+                            </div>
+                            <div class="transaction-item">
+                                <div class="tx-info">
+                                    <div class="tx-icon" style="color: var(--text-main); background: rgba(231, 76, 60, 0.1);"><i class="fa-solid fa-arrow-up"></i></div>
+                                    <div class="tx-details">
+                                        <h4>حوالة صادرة</h4>
+                                        <p>02 يونيو، 11:00 ص</p>
+                                    </div>
+                                </div>
+                                <div class="tx-amount negative">- 1,200.00</div>
+                            </div>
+                            <div class="transaction-item">
+                                <div class="tx-info">
+                                    <div class="tx-icon" style="color: var(--success); background: rgba(46, 204, 113, 0.1);"><i class="fa-solid fa-arrow-down"></i></div>
+                                    <div class="tx-details">
+                                        <h4>حوالة واردة</h4>
+                                        <p>28 مايو، 09:15 ص</p>
+                                    </div>
+                                </div>
+                                <div class="tx-amount positive">+ 3,000.00</div>
+                            </div>
+                            <div class="transaction-item">
+                                <div class="tx-info">
+                                    <div class="tx-icon" style="color: var(--text-main); background: rgba(231, 76, 60, 0.1);"><i class="fa-solid fa-arrow-up"></i></div>
+                                    <div class="tx-details">
+                                        <h4>حوالة صادرة</h4>
+                                        <p>15 مايو، 06:45 م</p>
+                                    </div>
+                                </div>
+                                <div class="tx-amount negative">- 250.00</div>
+                            </div>
+                            <div class="transaction-item">
+                                <div class="tx-info">
+                                    <div class="tx-icon" style="color: var(--success); background: rgba(46, 204, 113, 0.1);"><i class="fa-solid fa-arrow-down"></i></div>
+                                    <div class="tx-details">
+                                        <h4>حوالة واردة</h4>
+                                        <p>01 مايو، 10:00 ص</p>
+                                    </div>
+                                </div>
+                                <div class="tx-amount positive">+ 500.00</div>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-outline" style="margin-top: 15px; margin-bottom: 20px; width: 100%; border: 1px solid var(--alinma-blue); color: var(--alinma-blue); background: transparent;" onclick="showToast('تم عرض جميع العمليات الصادرة والواردة')">
+                            المزيد من العمليات السابقة
+                        </button>
+                    </div>
+                </div> <!-- Close dashboard-scroll-area -->
+
+                <!-- Voice Button -->
+                <div class="mic-btn-wrapper">
+                    <button id="mic-btn" class="mic-btn" onclick="startListening()" title="تحدث الآن">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                </div>
+
+                <!-- Navigation Bar (Tabs) -->
+                <nav class="bottom-nav">
+                    <div class="nav-item active" onclick="switchTab('home')">
+                        <i class="fa-solid fa-house"></i>
+                        الرئيسية
+                    </div>
+                    <div class="nav-item" onclick="switchTab('beneficiaries')">
+                        <i class="fa-solid fa-users"></i>
+                        المستفيدون
+                    </div>
+                    <div class="nav-item center-space">
+                        <!-- Space for floating mic button -->
+                    </div>
+                    <div class="nav-item">
+                        <i class="fa-solid fa-credit-card"></i>
+                        البطاقات
+                    </div>
+                    <div class="nav-item">
+                        <i class="fa-solid fa-ellipsis"></i>
+                        المزيد
+                    </div>
+                </nav>
+            </div>
+
+            <!-- Confirmation Modal -->
+            <div id="confirm-modal" class="modal-overlay hidden">
+                <div class="modal-content">
+                    <i id="modal-icon" class="fa-solid fa-circle-question modal-icon"></i>
+                    <h3 class="modal-title">تأكيد الأمر الصوتي</h3>
+                    <p id="modal-text" class="modal-body">هل أنت متأكد من تنفيذ هذا الأمر؟</p>
+                    <div class="modal-actions">
+                        <button class="btn btn-primary" onclick="confirmAction()">تأكيد</button>
+                        <button class="btn btn-outline" onclick="cancelAction()">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Application Logic (Vanilla JS) -->
+    <script>
+        // State variables
+        let isListeningState = false;
+        let pendingActionData = null;
+        let currentBalance = 12450.00;
+
+        // Elements
+        const loginScreen = document.getElementById('login-screen');
+        const dashboardScreen = document.getElementById('dashboard-screen');
+        const confirmModal = document.getElementById('confirm-modal');
+        const modalIcon = document.getElementById('modal-icon');
+        const modalText = document.getElementById('modal-text');
+        
+        const toastMessage = document.getElementById('toast-message');
+        const toastText = document.getElementById('toast-text');
+        
+        const voiceOutput = document.getElementById('voice-output');
+        const voiceText = document.getElementById('voice-text');
+        
+        const micBtn = document.getElementById('mic-btn');
+
+        // Functions
+        function showToast(msg) {
+            toastText.textContent = msg;
+            toastMessage.classList.remove('hidden');
+            setTimeout(() => {
+                toastMessage.classList.add('hidden');
+            }, 3000);
+        }
+
+        function switchTab(tabName) {
+            const homeContent = document.getElementById('home-content');
+            const beneficiariesContent = document.getElementById('beneficiaries-content');
+            const beneficiaryDetailsContent = document.getElementById('beneficiary-details-content');
+            const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+            
+            navItems.forEach(item => item.classList.remove('active'));
+            
+            if (tabName === 'home') {
+                homeContent.classList.remove('hidden');
+                beneficiariesContent.classList.add('hidden');
+                if(beneficiaryDetailsContent) beneficiaryDetailsContent.classList.add('hidden');
+                navItems[0].classList.add('active');
+            } else if (tabName === 'beneficiaries') {
+                homeContent.classList.add('hidden');
+                beneficiariesContent.classList.remove('hidden');
+                if(beneficiaryDetailsContent) beneficiaryDetailsContent.classList.add('hidden');
+                navItems[1].classList.add('active');
+            }
+        }
+
+        function showBeneficiaryDetails(name, bankInfo) {
+            document.getElementById('beneficiaries-content').classList.add('hidden');
+            document.getElementById('beneficiary-details-content').classList.remove('hidden');
+            document.getElementById('detail-name').innerText = name;
+            document.getElementById('detail-bank').innerText = bankInfo;
+        }
+
+        function backToBeneficiaries() {
+            document.getElementById('beneficiary-details-content').classList.add('hidden');
+            document.getElementById('beneficiaries-content').classList.remove('hidden');
+        }
+
+        function startTransferVoiceCommand(name) {
+            // Simulate voice command for transfer
+            processVoiceCommand(`حول رصيد لـ ${name}`);
+        }
+
+        function showPasswordInput() {
+            document.getElementById('password-btn').classList.add('hidden');
+            document.getElementById('password-input-container').classList.remove('hidden');
+            document.getElementById('password-input').focus();
+        }
+
+        function handlePasswordLogin() {
+            const pwd = document.getElementById('password-input').value;
+            if (pwd === '1415') {
+                handleLogin();
+            } else {
+                document.getElementById('password-error').classList.remove('hidden');
+            }
+        }
+
+        function handleLogin() {
+            // Reset login screen state
+            document.getElementById('password-btn').classList.remove('hidden');
+            document.getElementById('password-input-container').classList.add('hidden');
+            document.getElementById('password-error').classList.add('hidden');
+            document.getElementById('password-input').value = '';
+
+            loginScreen.classList.add('hidden');
+            dashboardScreen.classList.remove('hidden');
+        }
+
+        function handleLogout() {
+            dashboardScreen.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+            voiceOutput.classList.add('hidden');
+            showToast('تم تسجيل الخروج بنجاح');
+        }
+
+        function startListening() {
+            if (isListeningState) return;
+            
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!SpeechRecognition) {
+                showToast('عذراً، متصفحك لا يدعم خاصية التعرف على الصوت.');
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'ar-SA'; // Arabic (Saudi Arabia)
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                isListeningState = true;
+                micBtn.classList.add('listening');
+                voiceText.textContent = 'تحدث الآن...';
+                voiceOutput.classList.remove('hidden');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.trim();
+                voiceText.textContent = '"' + transcript + '"';
+                
+                isListeningState = false;
+                micBtn.classList.remove('listening');
+                
+                setTimeout(() => {
+                    processVoiceCommand(transcript);
+                }, 1000);
+            };
+
+            recognition.onerror = (event) => {
+                isListeningState = false;
+                micBtn.classList.remove('listening');
+                voiceOutput.classList.add('hidden');
+                showToast('لم أتمكن من سماعك بوضوح، يرجى المحاولة مرة أخرى.');
+            };
+
+            recognition.onend = () => {
+                isListeningState = false;
+                micBtn.classList.remove('listening');
+                if (!pendingActionData) {
+                    setTimeout(() => voiceOutput.classList.add('hidden'), 2000);
+                }
+            };
+
+            recognition.start();
+        }
+
+        function processVoiceCommand(text) {
+            let action = 'UNKNOWN';
+            let msg = 'أمر غير معروف';
+            let amount = null;
+
+            // Extract any number spoken
+            const matches = text.match(/\d+/);
+            if (matches) {
+                amount = parseInt(matches[0]);
+            }
+
+            if (text.includes('إيقاف') || text.includes('وقف') || text.includes('بطاق')) {
+                action = 'BLOCK_CARD';
+                msg = 'إيقاف البطاقة';
+            } else if (text.includes('حول') || text.includes('تحويل') || text.includes('رصيد')) {
+                action = 'TRANSFER';
+                amount = amount || 500; // default if no number spoken
+                msg = 'تحويل ' + amount + ' ريال';
+            } else if (text.includes('سدد') || text.includes('فاتور') || text.includes('دفع')) {
+                action = 'PAY_BILL';
+                amount = amount || 200; // default if no number spoken
+                msg = 'سداد فاتورة بقيمة ' + amount + ' ريال';
+            } else if (text.includes('كشف') || text.includes('عمليات')) {
+                action = 'STATEMENT';
+                msg = 'إصدار كشف حساب';
+            } else if (text.includes('خروج') || text.includes('اخرج')) {
+                action = 'LOGOUT';
+                msg = 'تسجيل الخروج';
+            } else {
+                showToast('عذراً، لم أفهم الأمر. يرجى إعادة المحاولة.');
+                voiceOutput.classList.add('hidden');
+                return;
+            }
+
+            pendingActionData = { action, msg, amount };
+
+            if (action === 'BLOCK_CARD') {
+                modalIcon.className = 'fa-solid fa-triangle-exclamation modal-icon danger';
+            } else {
+                modalIcon.className = 'fa-solid fa-circle-question modal-icon';
+            }
+            
+            modalText.textContent = 'هل أنت متأكد من ' + msg + '؟';
+            confirmModal.classList.remove('hidden');
+            voiceOutput.classList.add('hidden');
+        }
+
+        function confirmAction() {
+            confirmModal.classList.add('hidden');
+            
+            if (pendingActionData.action === 'LOGOUT') {
+                handleLogout();
+            } else if (pendingActionData.action === 'STATEMENT') {
+                showToast('تم إرسال كشف الحساب لآخر 30 يوم إلى بريدك الإلكتروني بنجاح 📧');
+            } else {
+                if (pendingActionData.action === 'TRANSFER' || pendingActionData.action === 'PAY_BILL') {
+                    if (pendingActionData.amount) {
+                        currentBalance -= pendingActionData.amount;
+                        document.getElementById('balance-value').textContent = currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    }
+                }
+                showToast('تم تنفيذ طلب: ' + pendingActionData.msg + ' بنجاح');
+            }
+            
+            pendingActionData = null;
+        }
+
+        function cancelAction() {
+            confirmModal.classList.add('hidden');
+            pendingActionData = null;
+            showToast('تم إلغاء الأمر');
+        }
+    </script>
+</body>
+</html>
