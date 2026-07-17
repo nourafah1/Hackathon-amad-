@@ -488,6 +488,10 @@
                 voiceOutput.classList.remove('hidden');
             };
 
+            recognition.onspeechend = () => {
+                recognition.stop();
+            };
+
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript.trim();
                 voiceText.textContent = '"' + transcript + '"';
