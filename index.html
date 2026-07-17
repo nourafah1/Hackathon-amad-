@@ -468,7 +468,13 @@
                 isListeningState = false;
                 micBtn.classList.remove('listening');
                 voiceOutput.classList.add('hidden');
-                showToast('لم أتمكن من سماعك بوضوح، يرجى المحاولة مرة أخرى.');
+                
+                let errorMsg = 'لم أتمكن من سماعك بوضوح.';
+                if (event.error === 'not-allowed') errorMsg = 'يرجى السماح للتطبيق باستخدام المايكروفون.';
+                if (event.error === 'network') errorMsg = 'يوجد مشكلة في الاتصال بالإنترنت.';
+                if (event.error === 'no-speech') errorMsg = 'لم أتمكن من التقاط أي صوت.';
+                
+                showToast(errorMsg + ' (' + event.error + ')');
             };
 
             recognition.onend = () => {
