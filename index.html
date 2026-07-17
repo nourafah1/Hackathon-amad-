@@ -279,6 +279,33 @@
                             المزيد من العمليات السابقة
                         </button>
                     </div>
+
+                    <!-- Payments Screen -->
+                    <div id="payments-content" class="animate-fade-in hidden" style="padding: 10px 25px;">
+                        <h3 class="section-title" style="margin-bottom: 20px;">المخالفات المرورية</h3>
+                        <div class="transaction-list">
+                            <div class="transaction-item" style="cursor: pointer;" onclick="processVoiceCommand('سداد مخالفة بقيمة 150')">
+                                <div class="tx-info">
+                                    <div class="tx-icon" style="color: var(--warning); background: rgba(243, 156, 18, 0.1);"><i class="fa-solid fa-car-burst"></i></div>
+                                    <div class="tx-details">
+                                        <h4>تجاوز السرعة المحددة</h4>
+                                        <p style="color: var(--text-muted); font-size: 0.85rem;">مخالفة رقم: 1234 - 10 يوليو</p>
+                                    </div>
+                                </div>
+                                <div class="tx-amount negative" style="font-weight: bold;">- 150.00</div>
+                            </div>
+                            <div class="transaction-item" style="cursor: pointer;" onclick="processVoiceCommand('سداد مخالفة بقيمة 100')">
+                                <div class="tx-info">
+                                    <div class="tx-icon" style="color: var(--warning); background: rgba(243, 156, 18, 0.1);"><i class="fa-solid fa-car-burst"></i></div>
+                                    <div class="tx-details">
+                                        <h4>وقوف خاطئ</h4>
+                                        <p style="color: var(--text-muted); font-size: 0.85rem;">مخالفة رقم: 5678 - 05 يوليو</p>
+                                    </div>
+                                </div>
+                                <div class="tx-amount negative" style="font-weight: bold;">- 100.00</div>
+                            </div>
+                        </div>
+                    </div>
                 </div> <!-- Close dashboard-scroll-area -->
 
                 <!-- Voice Button -->
@@ -301,9 +328,9 @@
                     <div class="nav-item center-space">
                         <!-- Space for floating mic button -->
                     </div>
-                    <div class="nav-item">
-                        <i class="fa-solid fa-credit-card"></i>
-                        البطاقات
+                    <div class="nav-item" onclick="switchTab('payments')">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                        المدفوعات
                     </div>
                     <div class="nav-item">
                         <i class="fa-solid fa-ellipsis"></i>
@@ -363,6 +390,7 @@
             const homeContent = document.getElementById('home-content');
             const beneficiariesContent = document.getElementById('beneficiaries-content');
             const beneficiaryDetailsContent = document.getElementById('beneficiary-details-content');
+            const paymentsContent = document.getElementById('payments-content');
             const navItems = document.querySelectorAll('.bottom-nav .nav-item');
             
             navItems.forEach(item => item.classList.remove('active'));
@@ -371,12 +399,20 @@
                 homeContent.classList.remove('hidden');
                 beneficiariesContent.classList.add('hidden');
                 if(beneficiaryDetailsContent) beneficiaryDetailsContent.classList.add('hidden');
+                if(paymentsContent) paymentsContent.classList.add('hidden');
                 navItems[0].classList.add('active');
             } else if (tabName === 'beneficiaries') {
                 homeContent.classList.add('hidden');
                 beneficiariesContent.classList.remove('hidden');
                 if(beneficiaryDetailsContent) beneficiaryDetailsContent.classList.add('hidden');
+                if(paymentsContent) paymentsContent.classList.add('hidden');
                 navItems[1].classList.add('active');
+            } else if (tabName === 'payments') {
+                homeContent.classList.add('hidden');
+                beneficiariesContent.classList.add('hidden');
+                if(beneficiaryDetailsContent) beneficiaryDetailsContent.classList.add('hidden');
+                if(paymentsContent) paymentsContent.classList.remove('hidden');
+                navItems[3].classList.add('active'); // 0=home, 1=bene, 2=center, 3=payments, 4=more
             }
         }
 
@@ -506,10 +542,10 @@
                 action = 'TRANSFER';
                 amount = amount || 500; // default if no number spoken
                 msg = 'تحويل ' + amount + ' ريال';
-            } else if (text.includes('سدد') || text.includes('فاتور') || text.includes('دفع')) {
+            } else if (text.includes('سدد') || text.includes('سداد') || text.includes('فاتور') || text.includes('دفع') || text.includes('مخالف')) {
                 action = 'PAY_BILL';
                 amount = amount || 200; // default if no number spoken
-                msg = 'سداد فاتورة بقيمة ' + amount + ' ريال';
+                msg = text.includes('مخالف') ? 'سداد مخالفة بقيمة ' + amount + ' ريال' : 'سداد فاتورة بقيمة ' + amount + ' ريال';
             } else if (text.includes('كشف') || text.includes('عمليات')) {
                 action = 'STATEMENT';
                 msg = 'إصدار كشف حساب';
